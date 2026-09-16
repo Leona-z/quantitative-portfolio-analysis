@@ -1,310 +1,343 @@
 # Quantitative Portfolio Analysis & Optimization
 
-A Python-based quantitative finance project that analyzes historical A-share market data and applies portfolio risk measurement, constrained portfolio optimization, efficient frontier analysis, out-of-sample backtesting, and robustness testing.
+A Python-based quantitative finance project analyzing the risk and performance of a three-stock A-share portfolio, with portfolio optimization, efficient frontier analysis, out-of-sample testing, and robustness analysis.
 
 ## Project Overview
 
-This project was developed to explore how quantitative methods can be applied to portfolio construction and risk management.
+This project applies quantitative finance and portfolio theory techniques to analyze a portfolio consisting of three Chinese A-share stocks:
 
-Using historical price data for three A-share stocks, the project:
+- **ZGC** — 紫光股份 (000938)
+- **GDS** — 兆易创新 (603986)
+- **HTKJ** — 华天科技 (002185)
 
-- Processes and cleans historical market data
-- Calculates daily and annualized returns
-- Measures portfolio volatility and covariance
-- Analyzes correlations between assets
-- Evaluates portfolio performance using Sharpe ratio and CAGR
-- Measures downside risk using Value at Risk (VaR) and maximum drawdown
-- Implements minimum-volatility and maximum-Sharpe portfolio optimization
-- Applies portfolio weight constraints to control concentration risk
-- Simulates portfolios to construct an efficient frontier
-- Performs out-of-sample backtesting
-- Tests the sensitivity of portfolio optimization to weight constraints
+The project evaluates portfolio performance and risk under different portfolio construction methods and examines whether optimization results remain stable under out-of-sample testing and different portfolio concentration constraints.
 
-The project focuses on the relationship between expected return, portfolio risk, diversification, and model robustness.
+The project was developed using **Python, Pandas, NumPy, SciPy, and Matplotlib**.
 
----
+## Key Features
+
+- Historical stock price data processing
+- Daily return calculation
+- Annualized return and volatility analysis
+- Covariance and correlation analysis
+- Portfolio performance evaluation
+- Constrained portfolio optimization
+- Efficient frontier simulation
+- Out-of-sample portfolio testing
+- Portfolio concentration robustness analysis
+- Visualization of portfolio risk-return characteristics
 
 ## Project Structure
 
 ```text
 quantitative-portfolio-analysis/
-│
-├── main.py
-├── prepare_a_share_data.py
-│
 ├── data/
 │   └── stock_data_a_share.csv
-│
-├── results/
-│   ├── constrained_portfolio_results.csv
-│   ├── constrained_efficient_frontier_data.csv
-│   ├── constrained_out_of_sample_results.csv
-│   ├── constrained_training_weights.csv
-│   └── robustness_analysis.csv
-│
 ├── figures/
 │   ├── constrained_efficient_frontier.png
 │   ├── constrained_out_of_sample.png
 │   └── robustness_sharpe.png
-│
+├── results/
+│   ├── constrained_efficient_frontier_data.csv
+│   ├── constrained_out_of_sample_results.csv
+│   ├── constrained_portfolio_results.csv
+│   ├── constrained_training_weights.csv
+│   └── robustness_analysis.csv
+├── main.py
+├── prepare_a_share_data.py
 ├── README.md
 └── .gitignore
+```
 
-Data
+## Data
 
-The project uses historical daily price data for three A-share stocks:
+Historical daily stock prices were used for the analysis.
 
-Ticker	Stock
-000938	紫光股份 (ZGC)
-603986	兆易创新 (GDS)
-002185	华天科技 (HTKJ)
+The dataset covers:
 
-The analysis period covers:
+**January 2023 – August 2026**
 
-2023-01-03 to 2026-08-31
+with **877 trading days** and **876 return observations** after calculating daily returns.
 
-The raw historical data were cleaned and merged into a single time-series dataset before analysis.
+The three stocks were selected from the user's simulated A-share portfolio.
+## Methodology
 
-For portfolio analysis, closing prices are used to calculate daily returns.
-
-Methodology
-1. Daily Returns
+### 1. Daily Returns
 
 Daily simple returns are calculated as:
 
-$$ R_t = \frac{P_t}{P_{t-1}} - 1 $$
+$$
+R_t = \frac{P_t}{P_{t-1}} - 1
+$$
 
 where:
 
-$P_t$ = closing price at time $t$
-$P_{t-1}$ = previous trading day's closing price
-2. Annualized Return
+- $P_t$ = closing price on day $t$
+- $P_{t-1}$ = closing price on the previous trading day
 
-The annualized arithmetic mean return is calculated as:
+### 2. Portfolio Return
 
-$$ E(R_{annual}) = \bar{R}_{daily} \times 252 $$
+For a portfolio containing $n$ assets:
 
-where 252 represents the approximate number of trading days in a year.
-
-3. Annualized Volatility
-
-Daily volatility is annualized using:
-
-$$ \sigma_{annual} = \sigma_{daily} \times \sqrt{252} $$
-4. Covariance and Correlation
-
-The project calculates the covariance matrix and correlation matrix of daily returns to capture the relationships between assets.
-
-Portfolio variance is calculated as:
-
-$$ \sigma_p^2 = w^T \Sigma w $$
+$$
+R_p = \sum_{i=1}^{n} w_i R_i
+$$
 
 where:
 
-$w$ = portfolio weight vector
-$\Sigma$ = covariance matrix
-Portfolio Construction
+- $w_i$ = portfolio weight of asset $i$
+- $R_i$ = return of asset $i$
 
-Four portfolio strategies are evaluated.
+The portfolio is evaluated under several different weighting schemes.
 
-Current Portfolio
+### 3. Portfolio Volatility
 
-A fixed portfolio with:
+Portfolio volatility is calculated using the covariance matrix:
 
-ZGC: 40%
-GDS: 30%
-HTKJ: 30%
-Equal Weight Portfolio
-
-Each stock receives:
-
-ZGC: 33.33%
-GDS: 33.33%
-HTKJ: 33.33%
-Minimum Volatility Portfolio
-
-The portfolio weights are optimized to minimize annualized portfolio volatility.
-
-Maximum Sharpe Portfolio
-
-The portfolio weights are optimized to maximize:
-
-$$ Sharpe = \frac{E(R_p)-R_f}{\sigma_p} $$
+$$
+\sigma_p = \sqrt{w^T \Sigma w}
+$$
 
 where:
 
-$E(R_p)$ = expected annual portfolio return
-$R_f$ = risk-free rate
-$\sigma_p$ = annualized portfolio volatility
+- $w$ = vector of portfolio weights
+- $\Sigma$ = covariance matrix of asset returns
 
-For the constrained optimization, each individual asset is subject to a maximum portfolio weight of 60%.
+### 4. Sharpe Ratio
 
-Efficient Frontier
+The Sharpe Ratio is calculated as:
 
-A Monte Carlo simulation of feasible portfolios is used to visualize the relationship between expected annual return and annualized volatility.
+$$
+Sharpe = \frac{R_p - R_f}{\sigma_p}
+$$
 
-The efficient frontier analysis uses a consistent return definition:
+For this project, the risk-free rate is assumed to be:
 
-Y-axis: Expected Annual Return
-X-axis: Annualized Volatility
-Color scale: Sharpe Ratio
+$$
+R_f = 0
+$$
 
-The portfolio weight constraint is incorporated into the simulation to reduce excessive concentration.
+This assumption is used for simplicity and should not be interpreted as a market forecast.
+## Portfolio Construction
 
-Out-of-Sample Backtesting
+Four portfolio strategies are compared.
 
-To evaluate whether optimization results generalize beyond the historical sample, the dataset is divided into training and testing periods.
+### Current Portfolio
 
-Training Period
+The original simulated portfolio allocation:
 
-2023-01-03 to 2025-12-31
+```text
+ZGC   40%
+GDS   30%
+HTKJ  30%
+```
 
-Testing Period
+### Equal-Weight Portfolio
 
-2026-01-05 to 2026-08-31
+Each stock receives an equal allocation:
 
-Portfolio optimization is performed using only the training data.
+```text
+ZGC   33.33%
+GDS   33.33%
+HTKJ  33.33%
+```
 
-The resulting portfolio weights are then applied to the testing period without further optimization.
+### Minimum-Volatility Portfolio
 
-This provides an out-of-sample evaluation of:
+The portfolio weights are optimized to minimize portfolio volatility.
 
-Total Return
-Annualized Return
-Annualized Volatility
-Sharpe Ratio
-Maximum Drawdown
-Robustness Analysis
+### Maximum-Sharpe Portfolio
 
-The project evaluates the sensitivity of the Maximum Sharpe portfolio to different maximum asset-weight constraints.
+The portfolio weights are optimized to maximize the Sharpe Ratio.
 
-The tested constraints are:
+### Portfolio Constraints
 
+To control concentration risk, the optimization is subject to:
+
+$$
+\sum_i w_i = 1
+$$
+
+and:
+
+$$
+0 \leq w_i \leq 60\%
+$$
+
+Therefore, no individual stock can account for more than 60% of the portfolio.
+
+The 60% constraint is a modeling assumption used for this project rather than an industry-standard limit.
+## Efficient Frontier
+
+The project simulates **20,000 feasible portfolios** under the portfolio constraints.
+
+Each portfolio is evaluated based on:
+
+- Expected annualized return
+- Annualized volatility
+- Sharpe Ratio
+
+The resulting portfolios are plotted to visualize the relationship between expected return and portfolio risk.
+
+![Constrained Efficient Frontier](figures/constrained_efficient_frontier.png)
+
+The efficient frontier provides a visual representation of the risk-return trade-off among feasible portfolio allocations.
+## Out-of-Sample Testing
+
+To reduce the risk of evaluating an optimized portfolio only on the same data used for optimization, the dataset is divided into training and testing periods.
+
+### Training Period
+
+```text
+2023-01-03 – 2025-12-31
+```
+
+### Testing Period
+
+```text
+2026-01-01 – 2026-08-31
+```
+
+The portfolio optimization process is performed using **training-period data only**.
+
+The resulting portfolio weights are then applied to the testing period.
+
+This provides an out-of-sample comparison between:
+
+- Current Portfolio
+- Equal-Weight Portfolio
+- Minimum-Volatility Portfolio
+- Maximum-Sharpe Portfolio
+
+## Out-of-Sample Results
+
+| Portfolio | Total Return | Annualized Return | Volatility | Sharpe Ratio | Max Drawdown |
+|---|---:|---:|---:|---:|---:|
+| Current | 77.11% | 140.42% | 55.46% | 1.902 | -31.74% |
+| Equal Weight | 77.84% | 141.95% | 56.92% | 1.879 | -33.63% |
+| Min Volatility | 69.44% | 124.63% | 59.28% | 1.699 | -36.01% |
+| Max Sharpe | 83.74% | 154.36% | 66.65% | 1.771 | -45.25% |
+
+> **Note:** The testing period covers only part of 2026. Annualized returns are therefore annualized measures rather than realized full-year returns.
+
+![Out-of-Sample Performance](figures/constrained_out_of_sample.png)
+## Robustness Analysis
+
+The project examines how portfolio optimization changes when the maximum allocation allowed to a single stock is varied.
+
+The maximum-weight constraints tested are:
+
+```text
 40%
 50%
 60%
 70%
 100%
+```
 
-For each constraint, portfolio weights are optimized using the training period and subsequently evaluated on the testing period.
+As the concentration constraint becomes less restrictive, the optimization tends to allocate a larger proportion of the portfolio to GDS.
 
-The analysis examines how changes in concentration constraints affect:
+The resulting out-of-sample results illustrate a trade-off between portfolio concentration, volatility, and drawdown.
 
-Portfolio allocation
-Out-of-sample return
-Out-of-sample volatility
-Sharpe ratio
-Maximum drawdown
-Key Findings
-1. Historical optimization favored GDS
+| Maximum Weight | GDS Weight | OOS Total Return | OOS Volatility | OOS Sharpe | Max Drawdown |
+|---:|---:|---:|---:|---:|---:|
+| 40% | 40.00% | 78.42% | 61.04% | 1.800 | -37.34% |
+| 50% | 50.00% | 81.10% | 63.88% | 1.784 | -41.66% |
+| 60% | 60.00% | 83.74% | 66.65% | 1.771 | -45.25% |
+| 70% | 70.00% | 85.97% | 69.85% | 1.748 | -48.98% |
+| 100% | 99.92% | 89.51% | 82.10% | 1.635 | -59.39% |
 
-The full-sample annualized mean returns were approximately:
+![Robustness Analysis](figures/robustness_sharpe.png)
+# Key Findings
+## 1. Portfolio optimization is sensitive to constraints
 
-Asset	Annualized Mean Return	Annualized Volatility
-ZGC	31.60%	51.05%
-GDS	55.38%	56.79%
-HTKJ	30.43%	45.37%
+The maximum-Sharpe optimization under a 60% maximum-weight constraint allocated:
 
-The higher historical return estimate for GDS caused the Maximum Sharpe optimization to assign a relatively large weight to GDS.
+### ZGC 12.58% | GDS 60.00% | HTKJ 27.42%
 
-2. Weight constraints reduced concentration
+This indicates that portfolio optimization can lead to substantial concentration in a single asset when concentration constraints are relatively loose.
 
-Under the 60% maximum-weight constraint, the full-sample Maximum Sharpe portfolio allocated:
+## 2. In-sample optimization does not necessarily translate directly into out-of-sample performance
 
-ZGC: 27.40%
-GDS: 60.00%
-HTKJ: 12.60%
+The maximum-Sharpe portfolio produced a higher historical return than the other tested strategies over the full sample.
 
-Without a meaningful concentration constraint, the optimization became highly concentrated in GDS.
+However, during the out-of-sample period, its higher return was accompanied by higher volatility and a deeper maximum drawdown compared with the current portfolio.
 
-3. In-sample optimization did not necessarily produce the strongest out-of-sample risk-adjusted performance
+This highlights the importance of evaluating portfolio strategies beyond in-sample optimization results.
 
-During the 2026 testing period:
+## 3. Concentration constraints affect the risk-return profile
 
-Strategy	Total Return	Volatility	Sharpe Ratio	Maximum Drawdown
-Current 40/30/30	77.11%	55.46%	1.902	-31.74%
-Equal Weight	77.84%	56.92%	1.879	-33.63%
-Minimum Volatility	69.44%	59.28%	1.699	-36.01%
-Maximum Sharpe	83.74%	66.65%	1.771	-45.25%
+The robustness analysis shows that increasing the maximum allowable allocation to a single stock leads to:
 
-The Maximum Sharpe portfolio achieved the highest total return in the testing period, but also experienced higher volatility and a deeper maximum drawdown than the Current 40/30/30 portfolio.
+Greater portfolio concentration
 
-4. Concentration increased as the maximum weight constraint was relaxed
+Higher out-of-sample volatility
 
-The robustness analysis showed that relaxing the maximum weight constraint led to progressively higher GDS allocation.
+Deeper maximum drawdowns
 
-At the same time:
+Lower out-of-sample Sharpe Ratios in this particular test period
 
-Out-of-sample return increased
-Out-of-sample volatility increased
-Maximum drawdown became deeper
-Out-of-sample Sharpe ratio decreased
+This illustrates the role of portfolio constraints in managing concentration risk.
 
-This illustrates the trade-off between return potential and concentration risk.
+# Technology Stack
+## Programming
+- Python
+## Libraries
+- Pandas — data processing and analysis
+- NumPy — numerical computation;
+- SciPy — constrained portfolio optimization;
+- Matplotlib — data visualization;
+## Tools
+- PyCharm
+- Git
+- GitHub
 
-Risk Analysis
+# Limitations
 
-The project incorporates several commonly used portfolio risk measures.
+This project is designed as a learning and quantitative analysis project rather than a complete investment system.
 
-Sharpe Ratio
+ Important limitations include:
 
-Measures risk-adjusted return relative to portfolio volatility.
+1. Only three stocks are included in the portfolio.
+2. The testing period is relatively short.
+3. No transaction costs are incorporated.
+4. No market impact or slippage is modeled.
+5. Taxes and liquidity constraints are not considered.
+6. The risk-free rate is assumed to be zero.
+7. The optimization relies on historical return and covariance estimates.
+8. The 60% maximum-weight constraint is a modeling assumption.
+9. Daily portfolio rebalancing is assumed.
+10. Annualized out-of-sample returns should be interpreted cautiously because the testing period does not cover a full year.
 
-Value at Risk
-
-Historical 95% one-day VaR is used to estimate the loss threshold corresponding to the lower tail of historical daily portfolio returns.
-
-VaR should not be interpreted as a maximum possible loss.
-
-Maximum Drawdown
-
-Measures the largest peak-to-trough decline in portfolio value during the analysis period.
-
-Rolling Volatility
-
-A 60-trading-day rolling volatility measure is used to examine changes in portfolio risk over time.
-
-Technology Stack
-Python
-Pandas
-NumPy
-SciPy
-Matplotlib
-
-Key Python libraries:
-
-pandas
-numpy
-scipy
-matplotlib
-Limitations
-
-This project is intended for educational and portfolio-analysis purposes rather than investment advice.
-
-Several limitations should be considered:
-
-Historical returns may not represent future expected returns.
-Portfolio optimization can be sensitive to expected-return estimates.
-The analysis does not incorporate transaction costs, taxes, slippage, or liquidity constraints.
-The current backtest assumes daily portfolio rebalancing to the target weights.
-The 60% maximum-weight constraint is a modeling assumption rather than an industry-standard threshold.
-The dataset contains only three stocks and therefore does not represent a diversified market portfolio.
-The out-of-sample testing period is relatively short compared with the training period.
-The analysis does not account for corporate actions beyond those reflected in the provided price data.
-Future Improvements
+# Future Improvements
 
 Potential extensions include:
 
-Rolling-window portfolio optimization
-Transaction-cost modeling
-Turnover analysis
-Alternative risk measures such as Sortino Ratio and CVaR
-Larger and more diversified asset universes
-Factor-based portfolio analysis
-Different estimation methods for expected returns and covariance
-Longer out-of-sample testing periods
-Conclusion
+- Expanding the portfolio to a larger number of stocks
+- Incorporating transaction costs 
+- Incorporating a non-zero risk-free rate
+- Testing alternative portfolio optimization methods
+- Adding rolling-window optimization
+- Comparing different rebalancing frequencies
+- Incorporating factor models
+- Adding Value-at-Risk (VaR) and Conditional VaR (CVaR)
+- Testing the strategy across different market periods
+- Automating data collection from reliable market-data sources
 
-This project demonstrates how quantitative methods can be used to connect historical market data, portfolio construction, risk measurement, optimization, and model validation.
+# Conclusion
 
-A key observation from the analysis is that portfolio optimization results can be sensitive to estimation assumptions and concentration constraints. Out-of-sample backtesting and robustness analysis therefore provide important complements to in-sample optimization.
+This project demonstrates the application of quantitative methods to portfolio analysis and optimization.
+
+The workflow covers the complete process from:
+
+Raw Historical Data → Data Cleaning → Return Calculation → Risk & Correlation Analysis → Portfolio Optimization → Efficient Frontier → Out-of-Sample Testing → Robustness Analysis
+
+The project provides practical experience with Python-based financial data analysis, numerical optimization, and portfolio risk assessment.
+
+## Author
+
+## Zhang Lingjia
+
+Financial Mathematics Undergraduate
+
+GitHub: Leona-z

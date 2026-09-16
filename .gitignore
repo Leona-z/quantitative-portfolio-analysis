@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temporary files
+*.tmp
+*.log
+
+# Local raw data
+000938历史数据.csv
+603986历史数据.csv
+002185历史数据.csv
+
+# Experimental files
+download_a_stock.py
+stock_data.csv
